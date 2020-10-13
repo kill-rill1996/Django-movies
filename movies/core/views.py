@@ -11,3 +11,10 @@ class MoviesView(View):
         return render(request, 'movies/movies.html', context)
 
 
+class MoviewDetailView(View):
+    """Film detail, full description"""
+    def get(self, request, slug):
+        movie = Movie.objects.get(url=slug)
+        context = {'movie': movie}
+        return render(request, 'movies/movie_detail.html', context)
+
