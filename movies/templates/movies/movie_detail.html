@@ -183,7 +183,7 @@
                     <p class="mt-2 editContent">
                         {{ review.text }}
                     </p>
-                    <a href="#formReview" onclick="addReview('{{ review.name }}', '{{ review.id }}')">Ответить</a>
+                    <a href="#FormReview" onclick="addReview('{{ review.name }}', '{{ review.id }}')">Ответить</a>
                     {% for rev in review.reviews_set.all %}
                     <div class="media mt-5 editContent">
                         <a class="pr-3" href="#">
