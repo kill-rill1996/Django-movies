@@ -9,7 +9,7 @@
         </div>
 
         <!--preference -->
-        <form action="{% url 'json-filter' %}" method="get" name="filter">
+        <form action="{% url 'filter-movie' %}" method="get" name="filter">
             <div class="left-side my-4">
                 <h3 class="sear-head editContent" >Жанры</h3>
                 {% for genre in view.get_genres %}
