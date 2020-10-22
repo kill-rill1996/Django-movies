@@ -1,15 +1,26 @@
+from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views.generic.base import View
-from .models import Movie, Category
+from .models import Movie, Category, Actor, Genre
 from .forms import ReviewForm
 
 
-class MoviesView(ListView):
+class GenreYear:
+    """Genres and year of the films"""
+    def get_genres(self):
+        return Genre.objects.all()
+
+    def get_year(self):
+        return Movie.objects.filter(draft=False).values('year')
+
+
+class MoviesView(ListView, GenreYear):
     """List of films"""
     model = Movie
     queryset = Movie.objects.filter(draft=False)
-    template_name = "movies/movies.html"
+    template_name = "movies/movie_list.html"
 
     # def get_context_data(self, *args, **kwargs):
     #     context = super().get_context_data(*args, **kwargs)
@@ -17,7 +28,7 @@ class MoviesView(ListView):
     #     return context
 
 
-class MoviewDetailView(DetailView):
+class MoviewDetailView(DetailView, GenreYear):
     """Film detail, full description"""
     model = Movie
     slug_field = "url"
@@ -42,4 +53,35 @@ class ReviewView(View):
             form.save()
         return redirect(movie.get_absolute_url())
 
+
+class ActorView(DetailView, GenreYear):
+    """Information about actors and directors"""
+    model = Actor
+    template_name = 'movies/actor.html'
+    slug_field = 'name'
+
+
+class MovieFilter(GenreYear, ListView):
+    """Filter for movies"""
+    template_name = 'movies/movie_list.html'
+
+    def get_queryset(self):
+        queryset = Movie.objects.filter(
+            Q(year__in=self.request.GET.getlist('year')) |
+            Q(genre__in=self.request.GET.getlist('genre'))
+        )
+        return queryset
+
+
+class JsonFilterMoviesView(ListView):
+    def get_queryset(self):
+        queryset = Movie.objects.filter(
+            Q(year__in=self.request.GET.getlist('year')) |
+            Q(genre__in=self.request.GET.getlist('genre'))
+        ).distinct().values('title', 'tagline', 'url', 'poster')
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        queryset = list(self.get_queryset())
+        return JsonResponse({'movies': queryset}, safe=False)
 
